@@ -1,5 +1,3 @@
-# users/models.py
-
 from django.db import models
 from django.contrib.auth.models import (
     BaseUserManager,
@@ -15,13 +13,18 @@ class CustomUserManager(BaseUserManager):
     """
     Manages user creation with separate logic for customers and admins.
     """
+
     def create_user(self, email, first_name, last_name, phone_number, birth_date, password, **extra_fields):
         if not email:
             raise ValueError("The Email field must be set")
         if not first_name:
-            raise ValueError("The First Name field must be set for customers")
+            raise ValueError("The First Name field must be set")
         if not last_name:
-            raise ValueError("The Last Name field must be set for customers")
+            raise ValueError("The Last Name field must be set")
+        if not phone_number:
+            raise ValueError("The Phone Number field must be set")
+        if not birth_date:
+            raise ValueError("The Birth Date field must be set")
         
         email = self.normalize_email(email)
         user = self.model(
@@ -37,6 +40,9 @@ class CustomUserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password, **extra_fields):
+        """
+        Superuser only needs email + password
+        """
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
@@ -45,7 +51,7 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
-        
+
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
@@ -55,19 +61,19 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField('email address', unique=True)
-    
-    first_name = models.CharField(max_length=150, blank=True, null=True)
-    last_name = models.CharField(max_length=150, blank=True, null=True)
-    phone_number = models.CharField(max_length=20, blank=True, null=True)
-    birth_date = models.DateField(blank=True, null=True)
-    
+
+    first_name = models.CharField(max_length=150)
+    last_name = models.CharField(max_length=150)
+    phone_number = models.CharField(max_length=20)
+    birth_date = models.DateField()
+
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    
+
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = []  # no required fields for superuser besides email
 
     # Override groups and permissions to avoid reverse accessor clash
     groups = models.ManyToManyField(
@@ -97,6 +103,6 @@ class Address(models.Model):
 
     def __str__(self):
         return f"{self.street_address}, {self.city} for {self.user.email}"
-        
+
     class Meta:
         verbose_name_plural = "Addresses"
