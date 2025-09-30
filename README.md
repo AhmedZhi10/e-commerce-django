@@ -28,7 +28,7 @@ This project is built with a modern and scalable set of technologies:
     * [Django](https://www.djangoproject.com/)
     * [Django REST Framework](https://www.django-rest-framework.org/)
 * **Database:**
-    * Designed for PostgreSQL, compatible with SQLite for development.
+    * Designed for MySql
 * **Environment Management:**
     * [Miniconda / Conda](https://docs.conda.io/en/latest/miniconda.html)
 * **API Documentation:**
